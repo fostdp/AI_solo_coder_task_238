@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>方言语音采集与回放</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>方言语音采集与回放</h1>
+      <p class="subtitle">探索方言魅力，录制你的声音</p>
+    </header>
+
+    <nav class="tabs">
+      <button class="tab-btn active" data-tab="record">录制</button>
+      <button class="tab-btn" data-tab="play">回放与评分</button>
+      <button class="tab-btn" data-tab="ai">AI测评</button>
+      <button class="tab-btn" data-tab="map">方言地图</button>
+      <button class="tab-btn" data-tab="challenge">趣味挑战</button>
+    </nav>
+
+    <main>
+      <section id="record-tab" class="tab-content active">
+        <div class="form-group">
+          <label for="dialect-select">选择方言：</label>
+          <select id="dialect-select">
+            <option value="">-- 请选择方言 --</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>选择例句：</label>
+          <div id="examples-list" class="examples-list">
+            <p class="empty-tip">请先选择方言</p>
+          </div>
+        </div>
+
+        <div class="recording-section">
+          <div class="status-indicator" id="record-status">等待开始</div>
+          
+          <div class="recording-controls">
+            <button id="start-btn" class="btn btn-primary">
+              <span class="icon">🎙️</span> 开始录音
+            </button>
+            <button id="stop-btn" class="btn btn-danger" disabled>
+              <span class="icon">⏹️</span> 停止录音
+            </button>
+          </div>
+
+          <div class="audio-preview" id="audio-preview" style="display: none;">
+            <h4>录音预览：</h4>
+            <audio id="preview-audio" controls></audio>
+            <div class="preview-actions">
+              <button id="re-record-btn" class="btn btn-secondary">重新录制</button>
+              <button id="upload-btn" class="btn btn-success">上传录音</button>
+            </div>
+          </div>
+
+          <div id="message" class="message"></div>
+        </div>
+      </section>
+
+      <section id="play-tab" class="tab-content">
+        <div class="form-group">
+          <label for="play-dialect-select">筛选方言：</label>
+          <select id="play-dialect-select">
+            <option value="">全部方言</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>筛选例句：</label>
+          <div id="play-examples-list" class="examples-list">
+            <p class="empty-tip">加载中...</p>
+          </div>
+        </div>
+
+        <div id="recordings-list" class="recordings-list">
+          <p class="empty-tip">暂无录音，去录制第一个吧！</p>
+        </div>
+      </section>
+
+      <section id="ai-tab" class="tab-content">
+        <div class="form-group">
+          <label for="ai-dialect-select">选择方言：</label>
+          <select id="ai-dialect-select">
+            <option value="">-- 请选择方言 --</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>选择测评例句：</label>
+          <div id="ai-examples-list" class="examples-list">
+            <p class="empty-tip">请先选择方言</p>
+          </div>
+        </div>
+
+        <div class="recording-section" id="ai-recording-section">
+          <div id="ai-status" class="status-indicator">准备开始测评</div>
+          
+          <div class="recording-controls">
+            <button id="ai-start-btn" class="btn btn-primary">
+              <span class="icon">🎤</span> 开始测评
+            </button>
+            <button id="ai-stop-btn" class="btn btn-danger" disabled>
+              <span class="icon">⏹️</span> 结束录音
+            </button>
+          </div>
+
+          <div id="ai-evaluating" class="ai-loading" style="display: none;">
+            <div class="ai-loading-spinner"></div>
+            <p>AI 正在分析您的发音...</p>
+          </div>
+
+          <div id="ai-result" class="ai-result" style="display: none;">
+            <div class="ai-score-header">
+              <div class="ai-score-circle">
+                <span id="ai-score">85</span>
+                <span class="ai-score-label">分</span>
+              </div>
+              <div class="ai-level-badge" id="ai-level">熟练</div>
+            </div>
+            
+            <div class="ai-score-breakdown">
+              <div class="score-item">
+                <div class="score-label">发音准确度</div>
+                <div class="score-bar">
+                  <div class="score-fill" id="score-pronunciation" style="width: 85%"></div>
+                </div>
+                <div class="score-value" id="score-pronunciation-val">85</div>
+              </div>
+              <div class="score-item">
+                <div class="score-label">语调韵律</div>
+                <div class="score-bar">
+                  <div class="score-fill" id="score-tone" style="width: 80%"></div>
+                </div>
+                <div class="score-value" id="score-tone-val">80</div>
+              </div>
+              <div class="score-item">
+                <div class="score-label">流利程度</div>
+                <div class="score-bar">
+                  <div class="score-fill" id="score-fluency" style="width: 90%"></div>
+                </div>
+                <div class="score-value" id="score-fluency-val">90</div>
+              </div>
+              <div class="score-item">
+                <div class="score-label">方言特色</div>
+                <div class="score-bar">
+                  <div class="score-fill" id="score-dialect" style="width: 88%"></div>
+                </div>
+                <div class="score-value" id="score-dialect-val">88</div>
+              </div>
+            </div>
+
+            <div class="ai-comment">
+              <h4>AI 点评</h4>
+              <p id="ai-comment-text">发音非常标准，语调自然流畅！</p>
+            </div>
+
+            <div class="ai-suggestions">
+              <h4>💡 改进建议</h4>
+              <ul id="ai-suggestions-list">
+                <li>建议多听本地音频，模仿当地人的语调。</li>
+              </ul>
+            </div>
+
+            <div class="ai-actions">
+              <button id="ai-retry-btn" class="btn btn-secondary">再试一次</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="map-tab" class="tab-content">
+        <div class="map-stats">
+          <div class="stat-card">
+            <div class="stat-number" id="total-recordings">0</div>
+            <div class="stat-label">总录音数</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-number">5</div>
+            <div class="stat-label">方言种类</div>
+          </div>
+        </div>
+
+        <div class="map-container">
+          <div class="china-map">
+            <div class="map-region region-north" data-dialect="beijing">
+              <div class="region-marker"></div>
+              <div class="region-info">
+                <div class="region-name">北京话</div>
+                <div class="region-count" id="count-beijing">0 条录音</div>
+              </div>
+            </div>
+            <div class="map-region region-east" data-dialect="shanghai">
+              <div class="region-marker"></div>
+              <div class="region-info">
+                <div class="region-name">上海话</div>
+                <div class="region-count" id="count-shanghai">0 条录音</div>
+              </div>
+            </div>
+            <div class="map-region region-south" data-dialect="guangdong">
+              <div class="region-marker"></div>
+              <div class="region-info">
+                <div class="region-name">广东话</div>
+                <div class="region-count" id="count-guangdong">0 条录音</div>
+              </div>
+            </div>
+            <div class="map-region region-southwest" data-dialect="sichuan">
+              <div class="region-marker"></div>
+              <div class="region-info">
+                <div class="region-name">四川话</div>
+                <div class="region-count" id="count-sichuan">0 条录音</div>
+              </div>
+            </div>
+            <div class="map-region region-northwest" data-dialect="shaanxi">
+              <div class="region-marker"></div>
+              <div class="region-info">
+                <div class="region-name">陕西话</div>
+                <div class="region-count" id="count-shaanxi">0 条录音</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="dialect-legend">
+          <h3>方言分布</h3>
+          <div class="legend-list" id="dialect-legend-list">
+          </div>
+        </div>
+      </section>
+
+      <section id="challenge-tab" class="tab-content">
+        <div class="challenge-header">
+          <div class="user-score">
+            <div class="score-badge">
+              <span id="user-score">0</span>
+              <span class="score-unit">积分</span>
+            </div>
+            <div class="completed-count">
+              已完成 <span id="completed-count">0</span> 个挑战
+            </div>
+          </div>
+          
+          <div class="leaderboard-preview">
+            <button id="view-leaderboard-btn" class="btn btn-secondary">🏆 查看排行榜</button>
+          </div>
+        </div>
+
+        <div class="challenges-grid" id="challenges-list">
+          <p class="empty-tip">加载挑战中...</p>
+        </div>
+
+        <div id="challenge-modal" class="modal" style="display: none;">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h3 id="modal-challenge-name">挑战名称</h3>
+              <button class="modal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+              <div class="challenge-info">
+                <span class="difficulty-badge" id="modal-difficulty">中等</span>
+                <span class="reward-badge">🎁 +<span id="modal-reward">100</span> 积分</span>
+              </div>
+              
+              <div class="form-group">
+                <label for="challenge-dialect-select">选择方言：</label>
+                <select id="challenge-dialect-select">
+                  <option value="">-- 请选择方言 --</option>
+                </select>
+              </div>
+
+              <div id="challenge-example-section" style="display: none;">
+                <div class="challenge-example">
+                  <h4>挑战内容：</h4>
+                  <p class="example-text" id="challenge-example-text"></p>
+                  <p class="example-hint" id="challenge-example-hint"></p>
+                </div>
+
+                <div class="recording-section challenge-recording">
+                  <div class="status-indicator" id="challenge-status">准备开始</div>
+                  
+                  <div class="recording-controls">
+                    <button id="challenge-start-btn" class="btn btn-primary">
+                      <span class="icon">🎤</span> 开始挑战
+                    </button>
+                    <button id="challenge-stop-btn" class="btn btn-danger" disabled>
+                      <span class="icon">⏹️</span> 结束录音
+                    </button>
+                  </div>
+
+                  <div class="audio-preview" id="challenge-preview" style="display: none;">
+                    <h4>录音预览：</h4>
+                    <audio id="challenge-audio" controls></audio>
+                    <div class="preview-actions">
+                      <button id="challenge-retry-btn" class="btn btn-secondary">重新录制</button>
+                      <button id="challenge-submit-btn" class="btn btn-success">提交挑战</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div id="challenge-result" class="challenge-result" style="display: none;">
+                <div class="result-stars" id="result-stars">⭐⭐</div>
+                <div class="result-score">得分: <span id="result-score">85</span></div>
+                <div class="result-comment" id="result-comment">表现不错！</div>
+                <div class="result-reward">
+                  获得 <span id="result-reward">+100</span> 积分
+                  <span id="first-time-badge" class="first-badge">首次完成</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div id="leaderboard-modal" class="modal" style="display: none;">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h3>🏆 挑战排行榜</h3>
+              <button class="modal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+              <div class="leaderboard-list" id="leaderboard-list">
+                <p class="empty-tip">暂无排名数据</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      <p>© 2025 方言语音采集应用</p>
+    </footer>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
